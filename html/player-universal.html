@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SVGA 通用播放器（支持 v1.x 和 v2.x）</title>
+  <link rel="stylesheet" href="css/player-universal.css">
+</head>
+<body>
+  <div class="container">
+    <h1>🎁 SVGA 通用播放器</h1>
+
+    <div class="canvas-wrap">
+      <canvas id="svgaCanvas" width="640" height="640"></canvas>
+    </div>
+
+    <div class="panel">
+      <button class="btn" id="btnSelect">📁 选择文件</button>
+      <button class="btn" id="btnReplay" disabled>🔄 重新播放</button>
+      <p id="status">等待选择文件...</p>
+    </div>
+
+    <div class="info">
+      <div>💡 <strong>功能说明：</strong></div>
+      <div>• 自动检测并播放 SVGA v1.x 和 v2.x 版本文件</div>
+      <div>• v1.x 特征：ZIP 封装，包含 <code>movie.spec</code> 文件</div>
+      <div>• v2.x 特征：Protobuf 格式，文件头为 <code>78 9C</code></div>
+    </div>
+  </div>
+
+  <!-- JSZip - 用于解析 v1.x ZIP 格式 -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+  <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+
+  <!-- svga-web: 支持 v2.x 版本 -->
+  <script src="../package/svga-web.min.js"></script>
+  
+  <!-- SVGAParser1x: 支持 v1.x 版本 -->
+  <script src="../package/parser.1x.js"></script>
+  
+  <!-- SVGAUtil: 版本检测工具 -->
+  <script src="../package/util.js"></script>
+
+  <script>
+    $(document).ready(function() {
+      let player = null;
+      let lastSvgaData = null;
+      let isPlaying = false;
+
+      const $canvas = $('#svgaCanvas');
+      const $statusEl = $('#status');
+      const $btnSelect = $('#btnSelect');
+      const $btnReplay = $('#btnReplay');
+
+      function setStatus(text, color) {
+        $statusEl.text(text);
+        $statusEl.css('color', color || '#aaa');
+      }
+
+      // 获取文件魔数（前4字节）
+      function getMagic(file) {
+        return file.slice(0, 4).arrayBuffer().then((buf) => {
+          return Array.from(new Uint8Array(buf))
+            .map((n) => n.toString(16).padStart(2, '0'))
+            .join(' ');
+        });
+      }
+
+      // 检查 ZIP 格式的 SVGA v1.x 版本信息
+      async function inspectZipSpecVersion(file) {
+        try {
+          const magic = await getMagic(file);
+          if (magic !== '50 4b 03 04') {
+            return null;
+          }
+          const zip = await JSZip.loadAsync(file);
+          const specEntry = zip.file('movie.spec');
+          if (!specEntry) {
+            return { magic, hasMovieSpec: false, ver: null };
+          }
+          const specText = await specEntry.async('text');
+          const specJson = JSON.parse(specText);
+          return {
+            magic,
+            hasMovieSpec: true,
+            ver: specJson && specJson.ver ? String(specJson.ver) : null
+          };
+        } catch (e) {
+          console.warn('inspectZipSpecVersion failed:', e);
+          return null;
+        }
+      }
+
+      // 初始化播放器
+      function initPlayer() {
+        if (player) {
+          try {
+            player.clear();
+            player.destroy();
+          } catch (e) {
+            console.warn('clear player failed:', e);
+          }
+        }
+        player = new SVGA.Player('#svgaCanvas');
+        return player;
+      }
+
+      // 播放文件
+      async function playFile(file) {
+        setStatus('🎬 加载中...', '#ffd700');
+
+        try {
+          // 步骤1: 检测文件版本
+          const zipInfo = await inspectZipSpecVersion(file);
+          const arrayBuffer = await file.arrayBuffer();
+          
+          let svgaVersion = 2;
+          if (zipInfo && zipInfo.hasMovieSpec && zipInfo.ver) {
+            svgaVersion = parseInt(zipInfo.ver.split('.')[0]);
+          } else {
+            svgaVersion = window.SVGAUtil.version(arrayBuffer);
+          }
+
+          console.log(`✅ 检测到 SVGA v${svgaVersion} 文件:`, file.name, zipInfo);
+
+          // 步骤2: 初始化播放器
+          initPlayer();
+
+          // 步骤3: 根据版本选择解析器
+          let parser;
+          if (svgaVersion === 1) {
+            console.log('使用 SVGAParser1x 解析 v1.x 文件');
+            parser = new window.SVGAParser1x({ disableWorker: false });
+          } else {
+            console.log('使用 SVGA.Parser 解析 v2.x 文件');
+            parser = new SVGA.Parser({ disableWorker: false });
+          }
+
+          // 步骤4: 解析文件
+          const svgaData = await parser.do(arrayBuffer);
+          lastSvgaData = svgaData;
+
+          console.log('解析成功:', {
+            version: svgaData.version,
+            frames: svgaData.frames,
+            FPS: svgaData.FPS,
+            videoSize: svgaData.videoSize,
+            images: Object.keys(svgaData.images || {}).length + ' 张图片'
+          });
+
+          // 步骤5: 挂载并播放
+          player.set({ loop: 1 });
+          await player.mount(svgaData);
+
+          // 绑定事件
+          player
+            .$on('start', () => {
+              isPlaying = true;
+              setStatus('🎉 播放中...', '#4caf50');
+            })
+            .$on('pause', () => {
+              isPlaying = false;
+              setStatus('⏸️ 已暂停', '#bdbdbd');
+            })
+            .$on('stop', () => {
+              isPlaying = false;
+              setStatus('⏹️ 已停止', '#bdbdbd');
+            })
+            .$on('end', () => {
+              isPlaying = false;
+              setStatus('✅ 播放完成', '#bdbdbd');
+            })
+            .$on('clear', () => {
+              isPlaying = false;
+              setStatus('🗑️ 已清空', '#bdbdbd');
+            })
+            .$on('process', () => {
+              // 可选：显示播放进度
+            });
+
+          player.start();
+          $btnReplay.prop('disabled', false);
+
+        } catch (error) {
+          const magic = await getMagic(file).catch(() => 'unknown');
+          console.error('❌ 播放失败:', error, 'file=', file.name, 'magic=', magic);
+          isPlaying = false;
+          $btnReplay.prop('disabled', true);
+          setStatus('❌ 解析失败（magic: ' + magic + '）: ' + (error.message || String(error)), '#ff4444');
+        }
+      }
+
+      // 选择文件按钮
+      $btnSelect.on('click', function() {
+        const $input = $('<input>', {
+          type: 'file',
+          accept: '.svga'
+        });
+        
+        $input.on('change', function(e) {
+          const file = e.target.files && e.target.files[0];
+          if (!file) {
+            return;
+          }
+          if (!file.name.toLowerCase().endsWith('.svga')) {
+            setStatus('⚠️ 请选择 .svga 格式的文件', '#ffaa00');
+            return;
+          }
+          playFile(file).catch((error) => {
+            console.error('播放异常:', error);
+            setStatus('❌ 播放异常: ' + (error.message || String(error)), '#ff4444');
+          });
+        });
+        
+        $input.trigger('click');
+      });
+
+      // 重新播放按钮
+      $btnReplay.on('click', function() {
+        if (!player || !lastSvgaData) {
+          setStatus('⚠️ 请先选择并成功播放一个文件', '#ffaa00');
+          return;
+        }
+        if (isPlaying) {
+          setStatus('⏳ 动画正在播放中...', '#ffaa00');
+          return;
+        }
+        try {
+          player.set({ loop: 1 });
+          player.start();
+          setStatus('🎉 重新播放中...', '#4caf50');
+        } catch (e) {
+          console.error('重新播放失败:', e);
+          setStatus('❌ 重新播放失败: ' + (e.message || String(e)), '#ff4444');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

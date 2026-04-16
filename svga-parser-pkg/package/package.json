@@ -1,0 +1,52 @@
+{
+  "name": "svga-parser",
+  "version": "1.9.7",
+  "description": "",
+  "main": "build/svgaParser.all.js",
+  "types": "build/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./build/svgaParser.all.js",
+      "require": "./build/svgaParser.all.js",
+      "types": "./build/index.d.ts"
+    },
+    "./min": {
+      "import": "./build/svgaParser.min.js",
+      "require": "./build/svgaParser.min.js",
+      "types": "./build/index.d.ts"
+    },
+    "./worker": {
+      "import": "./build/svgaParser.worker.js",
+      "require": "./build/svgaParser.worker.js",
+      "types": "./build/index.d.ts"
+    }
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@protobufjs/codegen": "^2.0.4",
+    "@protobufjs/float": "^1.0.2",
+    "@protobufjs/utf8": "^1.1.0",
+    "@types/pako": "^2.0.3",
+    "pako": "^2.1.0",
+    "protobufjs": "^6.8.0",
+    "eval5": "^1.4.5",
+    "ts-loader": "^4.0.0",
+    "typescript": "^3.5.1",
+    "uglifyjs-webpack-plugin": "^2.1.2",
+    "webpack": "^4.1.0",
+    "webpack-cli": "^3.3.2",
+    "worker-loader": "^3.0.8"
+  },
+  "scripts": {
+    "build": "webpack",
+    "buildW": "webpack --config webpack.all.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack -w",
+    "watch": "webpack --watch"
+  },
+  "author": "MrKwon",
+  "license": "ISC",
+  "keywords": [
+    "svga"
+  ]
+}
