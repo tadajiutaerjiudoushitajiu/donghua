@@ -28,6 +28,97 @@
     </div>
   </div>
 
+  <!-- 资源选择对话框 -->
+  <div id="resourceModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 1000;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, rgba(10, 14, 39, 0.95) 0%, rgba(26, 31, 58, 0.95) 100%); padding: 35px; border-radius: 20px; min-width: 550px; max-width: 80%; max-height: 80%; overflow-y: auto; border: 1px solid rgba(0, 243, 255, 0.3); box-shadow: 0 0 60px rgba(0, 243, 255, 0.2), inset 0 0 60px rgba(0, 243, 255, 0.05);">
+      <h2 style="margin-top: 0; color: #00f3ff; font-size: 24px; text-align: center; margin-bottom: 25px; text-shadow: 0 0 20px rgba(0, 243, 255, 0.5); letter-spacing: 2px;">&#x9009;&#x62E9; SVGA &#x8D44;&#x6E90;</h2>
+      
+      <div style="margin-bottom: 25px;">
+        <label style="display: block; margin-bottom: 15px; font-weight: 600; color: #8b9dc3; font-size: 15px;">&#x8BF7;&#x9009;&#x62E9;&#x8D44;&#x6E90;&#x7C7B;&#x578B;&#xFF1A;</label>
+        <div style="display: flex; gap: 20px;">
+          <label class="resource-option" style="cursor: pointer; padding: 15px 25px; border: 2px solid rgba(0, 243, 255, 0.3); border-radius: 12px; transition: all 0.3s; background: rgba(0, 243, 255, 0.05); display: flex; align-items: center; gap: 10px; flex: 1; justify-content: center;">
+            <input type="radio" name="resourceType" value="local" id="localResource" checked style="margin: 0; width: 18px; height: 18px; accent-color: #00f3ff;">
+            <span style="color: #fff; font-size: 15px;">&#x1F4C1; &#x672C;&#x5730;&#x8D44;&#x6E90;</span>
+          </label>
+          <label class="resource-option" style="cursor: pointer; padding: 15px 25px; border: 2px solid rgba(0, 243, 255, 0.3); border-radius: 12px; transition: all 0.3s; background: rgba(0, 243, 255, 0.05); display: flex; align-items: center; gap: 10px; flex: 1; justify-content: center;">
+            <input type="radio" name="resourceType" value="project" id="projectResource" style="margin: 0; width: 18px; height: 18px; accent-color: #00f3ff;">
+            <span style="color: #fff; font-size: 15px;">&#x1F3A8; &#x9879;&#x76EE;&#x8D44;&#x6E90;</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 项目资源选择区域 -->
+      <div id="projectResourceArea" style="display: none; margin-bottom: 25px;">
+        <label style="display: block; margin-bottom: 12px; font-weight: 600; color: #8b9dc3; font-size: 15px;">&#x9009;&#x62E9;&#x9879;&#x76EE;&#x4E2D;&#x7684; SVGA &#x6587;&#x4EF6;&#xFF1A;</label>
+        <select id="svgaFileSelect" size="8" style="width: 100%; padding: 12px; border: 2px solid rgba(0, 243, 255, 0.3); border-radius: 12px; font-size: 14px; background: rgba(0, 0, 0, 0.4); color: #fff; outline: none; transition: all 0.3s;">
+          <!-- 动态填充 SVGA 文件列表 -->
+        </select>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 25px;">
+        <button id="cancelBtn" class="modal-btn modal-btn-cancel" style="padding: 12px 30px; border: 2px solid rgba(0, 243, 255, 0.3); background: transparent; color: #00f3ff; border-radius: 12px; cursor: pointer; font-size: 15px; transition: all 0.3s; font-weight: 500;">&#x53D6;&#x6D88;</button>
+        <button id="confirmBtn" class="modal-btn modal-btn-confirm" style="padding: 12px 30px; border: none; background: linear-gradient(135deg, #00f3ff 0%, #0099ff 100%); color: #fff; border-radius: 12px; cursor: pointer; font-size: 15px; transition: all 0.3s; font-weight: 500; box-shadow: 0 4px 15px rgba(0, 243, 255, 0.3);">&#x786E;&#x8BA4;</button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* 模态框样式 */
+    .resource-option:hover {
+      border-color: #00f3ff !important;
+      background: rgba(0, 243, 255, 0.1) !important;
+      box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    .resource-option input[type="radio"]:checked + span {
+      color: #00f3ff;
+      text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+    }
+    
+    .resource-option:has(input[type="radio"]:checked) {
+      border-color: #00f3ff !important;
+      background: rgba(0, 243, 255, 0.15) !important;
+      box-shadow: 0 0 25px rgba(0, 243, 255, 0.3);
+    }
+    
+    #svgaFileSelect:focus {
+      border-color: #00f3ff !important;
+      box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+    }
+    
+    #svgaFileSelect option {
+      background: rgba(10, 14, 39, 0.95);
+      color: #fff;
+      padding: 8px;
+    }
+    
+    #svgaFileSelect option:hover {
+      background: rgba(0, 243, 255, 0.2);
+    }
+    
+    #svgaFileSelect option:checked {
+      background: linear-gradient(135deg, #00f3ff 0%, #0099ff 100%);
+      color: #fff;
+    }
+    
+    .modal-btn-cancel:hover {
+      background: rgba(0, 243, 255, 0.1) !important;
+      border-color: #00f3ff !important;
+      box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+      transform: translateY(-2px);
+    }
+    
+    .modal-btn-confirm:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 243, 255, 0.5) !important;
+    }
+    
+    .modal-btn:active {
+      transform: translateY(0);
+    }
+  </style>
+
   <!-- JSZip - 用于解析 v1.x ZIP 格式 -->
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
@@ -36,10 +127,10 @@
 
   <!-- svga-web: 支持 v2.x 版本 -->
   <script src="../package/svga-web.min.js"></script>
-  
+
   <!-- SVGAParser1x: 支持 v1.x 版本 -->
   <script src="../package/parser.1x.js"></script>
-  
+
   <!-- SVGAUtil: 版本检测工具 -->
   <script src="../package/util.js"></script>
 
@@ -53,6 +144,60 @@
       const $statusEl = $('#status');
       const $btnSelect = $('#btnSelect');
       const $btnReplay = $('#btnReplay');
+
+      // 项目中的 SVGA 文件列表
+      const projectSvgaFiles = [
+        // svga-gifts 目录
+        'svga-gifts/丘比特-1288-attr7.svga',
+        'svga-gifts/全猪出击-1904-attr4.svga',
+        'svga-gifts/告白气球-1789-attr7.svga',
+        'svga-gifts/大猫咪-1817-attr7.svga',
+        'svga-gifts/大马猴-1575-attr7.svga',
+        'svga-gifts/带你去旅行-1930-attr7.svga',
+        'svga-gifts/幸福花束-1867-attr4.svga',
+        'svga-gifts/心动打CALL-1860-attr7.svga',
+        'svga-gifts/春日焰火-2089-attr7.svga',
+        'svga-gifts/棒打鸳鸯-1637-attr7.svga',
+        'svga-gifts/比翼双飞-1878-attr7.svga',
+        'svga-gifts/热气球之约-401-attr7.svga',
+        'svga-gifts/爱之南瓜车-1869-attr7.svga',
+        'svga-gifts/爱的花火-1546-attr7.svga',
+        'svga-gifts/璀璨烟火-1792-attr7.svga',
+        'svga-gifts/甜心飞船-2031-attr7.svga',
+        'svga-gifts/福气到-1692-attr7.svga',
+        'svga-gifts/豪华游轮-1301-attr7.svga',
+        'svga-gifts/豪华超跑-1847-attr7.svga',
+        'svga-gifts/豪华飞机-1949-attr7.svga',
+        'svga-gifts/飞燕机长-1924-attr7.svga',
+        // svga-samples 目录
+        'svga-samples/ga6.svga',
+        'svga-samples/ga7.svga',
+        'svga-samples/ga8.svga',
+        'svga-samples/ga9.svga',
+        'svga-samples/ga10.svga',
+        'svga-samples/ga11.svga',
+        'svga-samples/ga12.svga',
+        'svga-samples/ga13.svga',
+        'svga-samples/ga14.svga',
+        'svga-samples/ga15.svga',
+        'svga-samples/ga16.svga',
+        'svga-samples/ga17.svga',
+        'svga-samples/ga18.svga',
+        'svga-samples/ga19.svga',
+        'svga-samples/ga20.svga',
+        'svga-samples/ga21.svga',
+        'svga-samples/ga22.svga',
+        'svga-samples/ga23.svga',
+        'svga-samples/ga24.svga',
+        'svga-samples/ga25.svga',
+        'svga-samples/ga26.svga',
+        'svga-samples/ga27.svga',
+        'svga-samples/ga28.svga',
+        'svga-samples/ga29.svga',
+        'svga-samples/ga30.svga',
+        'svga-samples/ga31.svga',
+        'svga-samples/ga32.svga'
+      ];
 
       function setStatus(text, color) {
         $statusEl.text(text);
@@ -115,7 +260,7 @@
           // 步骤1: 检测文件版本
           const zipInfo = await inspectZipSpecVersion(file);
           const arrayBuffer = await file.arrayBuffer();
-          
+
           let svgaVersion = 2;
           if (zipInfo && zipInfo.hasMovieSpec && zipInfo.ver) {
             svgaVersion = parseInt(zipInfo.ver.split('.')[0]);
@@ -124,6 +269,9 @@
           }
 
           console.log(`✅ 检测到 SVGA v${svgaVersion} 文件:`, file.name, zipInfo);
+          
+          // 显示版本信息
+          setStatus(`📄 文件: ${file.name} | 版本: SVGA v${svgaVersion} | 加载中...`, '#ffd700');
 
           // 步骤2: 初始化播放器
           initPlayer();
@@ -158,19 +306,19 @@
           player
             .$on('start', () => {
               isPlaying = true;
-              setStatus('🎉 播放中...', '#4caf50');
+              setStatus(`🎉 播放中 | 文件: ${file.name} | 版本: SVGA v${svgaVersion}`, '#4caf50');
             })
             .$on('pause', () => {
               isPlaying = false;
-              setStatus('⏸️ 已暂停', '#bdbdbd');
+              setStatus(`⏸️ 已暂停 | 文件: ${file.name} | 版本: SVGA v${svgaVersion}`, '#bdbdbd');
             })
             .$on('stop', () => {
               isPlaying = false;
-              setStatus('⏹️ 已停止', '#bdbdbd');
+              setStatus(`⏹️ 已停止 | 文件: ${file.name} | 版本: SVGA v${svgaVersion}`, '#bdbdbd');
             })
             .$on('end', () => {
               isPlaying = false;
-              setStatus('✅ 播放完成', '#bdbdbd');
+              setStatus(`✅ 播放完成 | 文件: ${file.name} | 版本: SVGA v${svgaVersion}`, '#bdbdbd');
             })
             .$on('clear', () => {
               isPlaying = false;
@@ -192,29 +340,122 @@
         }
       }
 
+      // 从 URL 加载并播放 SVGA 文件
+      async function playFromUrl(url) {
+        setStatus('🎬 加载中...', '#ffd700');
+
+        try {
+          const response = await fetch(url);
+          if (!response.ok) {
+            throw new Error('HTTP error! status: ' + response.status);
+          }
+          const blob = await response.blob();
+          const file = new File([blob], url.split('/').pop(), { type: 'application/octet-stream' });
+          await playFile(file);
+        } catch (error) {
+          console.error('❌ 加载失败:', error);
+          setStatus('❌ 加载失败: ' + (error.message || String(error)), '#ff4444');
+        }
+      }
+
+      // 打开资源选择对话框
+      function openResourceModal() {
+        // 重置选择
+        $('input[name="resourceType"][value="local"]').prop('checked', true);
+        $('#projectResourceArea').hide();
+        $('#svgaFileSelect').val('');
+
+        // 填充项目资源列表
+        const $select = $('#svgaFileSelect');
+        $select.empty();
+        projectSvgaFiles.forEach(function(filePath) {
+          const fileName = filePath.split('/').pop();
+          $select.append($('<option>', {
+            value: filePath,
+            text: fileName
+          }));
+        });
+
+        // 显示对话框
+        $('#resourceModal').fadeIn(200);
+      }
+
+      // 关闭资源选择对话框
+      function closeResourceModal() {
+        $('#resourceModal').fadeOut(200);
+      }
+
+      // 处理资源类型切换
+      $('input[name="resourceType"]').on('change', function() {
+        if ($(this).val() === 'project') {
+          $('#projectResourceArea').slideDown(200);
+        } else {
+          $('#projectResourceArea').slideUp(200);
+        }
+      });
+
       // 选择文件按钮
       $btnSelect.on('click', function() {
-        const $input = $('<input>', {
-          type: 'file',
-          accept: '.svga'
-        });
-        
-        $input.on('change', function(e) {
-          const file = e.target.files && e.target.files[0];
-          if (!file) {
+        openResourceModal();
+      });
+
+      // 取消按钮
+      $('#cancelBtn').on('click', function() {
+        closeResourceModal();
+      });
+
+      // 确认按钮
+      $('#confirmBtn').on('click', function() {
+        const resourceType = $('input[name="resourceType"]:checked').val();
+
+        if (resourceType === 'local') {
+          // 本地资源：打开文件选择框
+          closeResourceModal();
+
+          const $input = $('<input>', {
+            type: 'file',
+            accept: '.svga'
+          });
+
+          $input.on('change', function(e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) {
+              return;
+            }
+            if (!file.name.toLowerCase().endsWith('.svga')) {
+              setStatus('⚠️ 请选择 .svga 格式的文件', '#ffaa00');
+              return;
+            }
+            playFile(file).catch((error) => {
+              console.error('播放异常:', error);
+              setStatus('❌ 播放异常: ' + (error.message || String(error)), '#ff4444');
+            });
+          });
+
+          $input.trigger('click');
+        } else {
+          // 项目资源：获取选择的文件
+          const selectedFile = $('#svgaFileSelect').val();
+          if (!selectedFile) {
+            alert('请选择一个 SVGA 文件！');
             return;
           }
-          if (!file.name.toLowerCase().endsWith('.svga')) {
-            setStatus('⚠️ 请选择 .svga 格式的文件', '#ffaa00');
-            return;
-          }
-          playFile(file).catch((error) => {
+
+          closeResourceModal();
+
+          // 从 URL 加载并播放
+          playFromUrl(selectedFile).catch((error) => {
             console.error('播放异常:', error);
             setStatus('❌ 播放异常: ' + (error.message || String(error)), '#ff4444');
           });
-        });
-        
-        $input.trigger('click');
+        }
+      });
+
+      // 点击模态框背景关闭
+      $('#resourceModal').on('click', function(e) {
+        if (e.target === this) {
+          closeResourceModal();
+        }
       });
 
       // 重新播放按钮
