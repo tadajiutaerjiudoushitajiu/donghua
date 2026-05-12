@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apple 滚动淡入效果复刻</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #000;
+      color: #fff;
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    /* 占位高度，制造滚动空间 */
+    .space {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      opacity: 0.6;
+    }
+
+    /* 核心：默认初始状态 透明+向下偏移 */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(40px);
+      /* 明确属性，避免 transition: all 牵连无关样式 */
+      transition:
+        opacity 0.8s cubic-bezier(0.22, 1, 0.26, 1),
+        transform 0.8s cubic-bezier(0.22, 1, 0.26, 1);
+    }
+
+    /* 进入视口激活样式 */
+    .fade-up.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* 标题样式 仿Apple大标题 */
+    .title {
+      font-size: 56px;
+      font-weight: 600;
+      line-height: 1.2;
+      margin-bottom: 30px;
+    }
+
+    .desc {
+      font-size: 22px;
+      opacity: 0.8;
+    }
+
+    /* 加长页面：分段占位 */
+    .space-tall {
+      height: 120vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      opacity: 0.5;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* 多行列表式淡入块 */
+    .row-block {
+      max-width: 720px;
+      margin: 0 auto 28px;
+      padding: 18px 22px;
+      text-align: left;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .row-block .row-label {
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.55;
+      margin-bottom: 8px;
+    }
+
+    .row-block .row-text {
+      font-size: 17px;
+      line-height: 1.55;
+      opacity: 0.92;
+    }
+
+    .section-gap {
+      height: 45vh;
+    }
+
+    /* 第二模块：更大的入场位移、更慢更缓的过渡 */
+    .fade-up.fade-up--module2 {
+      transform: translateY(96px);
+      transition:
+        opacity 1.45s cubic-bezier(0.22, 0.61, 0.36, 1),
+        transform 1.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+
+    .fade-up.fade-up--module2.active {
+      transform: translateY(0);
+    }
+
+    /* 「生态与软件」：入场时长为默认 fade-up 的 2 倍（0.8s → 1.6s） */
+    .fade-up.fade-up--ecosystem {
+      transition:
+        opacity 1.6s cubic-bezier(0.22, 1, 0.26, 1),
+        transform 1.6s cubic-bezier(0.22, 1, 0.26, 1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .fade-up {
+        transition-duration: 0.01ms;
+        transform: none;
+      }
+      .fade-up.active {
+        transform: none;
+      }
+      .fade-up.fade-up--module2,
+      .fade-up.fade-up--module2.active {
+        transform: none;
+      }
+      .fade-up.fade-up--ecosystem,
+      .fade-up.fade-up--ecosystem.active {
+        transition-duration: 0.01ms;
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 空白占位 滚动用 -->
+  <div class="space">向下滚动查看动画效果</div>
+
+  <!-- 滚动淡入元素 -->
+  <h1 class="fade-up title">Mac</h1>
+  <p class="fade-up desc">实力，实打实超值。</p>
+
+  <div class="section-gap"></div>
+  <h2 class="fade-up fade-up--module2 title">轻薄 · 强大 · 持久续航</h2>
+  <p class="fade-up fade-up--module2 desc">页面已加长，多段内容依次淡入，滚动距离更明显。</p>
+
+  <div class="space-tall">继续向下 — 下方有多组行块</div>
+
+  <h2 class="fade-up title" style="font-size: 42px; margin-top: 40px;">特性一览</h2>
+  <div class="fade-up row-block">
+    <div class="row-label">Row 01</div>
+    <div class="row-text">Liquid 视网膜显示屏，色彩与对比度在滚动进入视口时触发淡入动画。</div>
+  </div>
+  <div class="fade-up row-block">
+    <div class="row-label">Row 02</div>
+    <div class="row-text">统一内存架构，多任务切换更顺滑，适合作为长页滚动演示的文案占位。</div>
+  </div>
+  <div class="fade-up row-block">
+    <div class="row-label">Row 03</div>
+    <div class="row-text">全天候电池续航，外出办公不必频繁寻找插座。</div>
+  </div>
+  <div class="fade-up row-block">
+    <div class="row-label">Row 04</div>
+    <div class="row-text">工作室级麦克风与摄像头，视频会议与播客录制更清晰。</div>
+  </div>
+  <div class="fade-up row-block">
+    <div class="row-label">Row 05</div>
+    <div class="row-text">雷雳高速接口，外接显示器与存储设备即插即用。</div>
+  </div>
+  <div class="fade-up row-block">
+    <div class="row-label">Row 06</div>
+    <div class="row-text">静音无风扇设计，长时间高负载仍保持安静环境。</div>
+  </div>
+  <div class="fade-up row-block">
+    <div class="row-label">Row 07</div>
+    <div class="row-text">触控 ID 一键登录与支付，安全与便捷兼顾。</div>
+  </div>
+  <div class="fade-up row-block">
+    <div class="row-label">Row 08</div>
+    <div class="row-text">与 iPhone、iPad 连续互通，剪贴板与接力无缝衔接。</div>
+  </div>
+  <div class="fade-up row-block">
+    <div class="row-label">Row 09</div>
+    <div class="row-text">专业级编解码，剪辑 4K 与多轨音频更省力。</div>
+  </div>
+  <div class="fade-up row-block">
+    <div class="row-label">Row 10</div>
+    <div class="row-text">本行及后续行用于拉长页面，便于观察 IntersectionObserver 触发节奏。</div>
+  </div>
+  <div class="fade-up row-block">
+    <div class="row-label">Row 11</div>
+    <div class="row-text">每块独立监听，进入视口后只播放一次淡入，避免重复闪烁。</div>
+  </div>
+  <div class="fade-up row-block">
+    <div class="row-label">Row 12</div>
+    <div class="row-text">降低动画偏好用户会收到简化过渡，兼顾可访问性。</div>
+  </div>
+
+  <div class="section-gap"></div>
+  <div class="space-tall">第二段长空白 — 再往下还有收尾区块</div>
+
+  <h2 class="fade-up fade-up--ecosystem title" style="font-size: 40px;">生态与软件</h2>
+  <div class="fade-up fade-up--ecosystem row-block">
+    <div class="row-label">Row 13</div>
+    <div class="row-text">Final Cut Pro、Logic Pro 等专业工具深度适配 Apple 芯片。</div>
+  </div>
+  <div class="fade-up fade-up--ecosystem row-block">
+    <div class="row-label">Row 14</div>
+    <div class="row-text">通用控制一套键鼠操控多台设备，桌面工作流更连贯。</div>
+  </div>
+  <div class="fade-up fade-up--ecosystem row-block">
+    <div class="row-label">Row 15</div>
+    <div class="row-text">iCloud 同步文档与照片，多终端随时接续上次进度。</div>
+  </div>
+  <div class="fade-up fade-up--ecosystem row-block">
+    <div class="row-label">Row 16</div>
+    <div class="row-text">沙盒与安全更新机制，降低恶意软件面，企业部署更安心。</div>
+  </div>
+  <div class="fade-up fade-up--ecosystem row-block">
+    <div class="row-label">Row 17</div>
+    <div class="row-text">Swift 与 SwiftUI 原生框架，自研小组件与内网工具开发效率高。</div>
+  </div>
+  <div class="fade-up fade-up--ecosystem row-block">
+    <div class="row-label">Row 18</div>
+    <div class="row-text">若仍觉得页面不够长，可继续复制 .fade-up.row-block 结构扩展。</div>
+  </div>
+
+  <div class="section-gap"></div>
+  <h2 class="fade-up title" style="font-size: 36px; margin-bottom: 48px;">到底了</h2>
+  <p class="fade-up desc" style="margin-bottom: 120px;">感谢滚动体验 — 返回首页可点击浏览器后退或从入口页重新进入。</p>
+
+  <script>
+    // 监听元素进入视口 触发淡入
+    document.addEventListener('DOMContentLoaded', function() {
+      const fadeEls = document.querySelectorAll('.fade-up');
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(item => {
+          // 元素进入可视区域
+          if (item.isIntersecting) {
+            item.target.classList.add('active');
+            // 触发一次后取消监听
+            observer.unobserve(item.target);
+          }
+        });
+      }, {
+        // 露出 10% 即触发；rootMargin 底部为正可扩大检测区，略提前触发动画
+        threshold: 0.1,
+        rootMargin: '0px 0px 12% 0px'
+      });
+
+      fadeEls.forEach(el => observer.observe(el));
+    });
+  </script>
+</body>
+</html>
